@@ -6,8 +6,6 @@ from config import TOKEN
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-
-@dp.message(Command('/start'))
 async def process_start_command(message):
     await message.answer("Привет!")
 
