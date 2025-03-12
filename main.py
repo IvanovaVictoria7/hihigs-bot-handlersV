@@ -1,8 +1,10 @@
+import asyncio
 imrort asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
 from config import TOKEN
 
+bot = Bot(token = TOKEN)
 
 #экземпляр бота
 bot = Bot(token="Your Token")
@@ -19,6 +21,7 @@ async def process_start_command(message):
 @dp.message()
 async def echo_message(message):
     await message.answer(message.text)
+
 
 #функция запуска проекта
 async def main():
