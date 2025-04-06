@@ -2,7 +2,7 @@
 import asyncio
 from aiogram import Bot, Dispatcher
 from config import TOKEN
-from handlers import register_message_handlers, set_my_commands
+from handlers import router, set_my_commands
 
 
 async def main():
@@ -16,7 +16,7 @@ async def main():
     dp = Dispatcher()
 
     # Здесь функция для вызова хендлеров из handlers.py
-    register_message_handlers()
+    dp.include_routers(router)
 
     # Здесь вызов меню с командами бота
     set_my_commands

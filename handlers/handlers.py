@@ -1,7 +1,6 @@
 __all__ = [
-    'register_message_handlers'
+    "router",
 ]
-
 
 # TODO - Опишите вызов функций обработчиков через маршрутизацию
 # Работа c Router - https://docs.aiogram.dev/en/v3.14.0/dispatcher/router.html
@@ -10,17 +9,37 @@ __all__ = [
 
 
 from aiogram import types, Router
+from aiogram.types import Message
+from aiogram.filters import Command
+#создание экземпляра объекта Router
+router=Router()
+@router.message(Command(commands=["start", "status"]))
+async def start_handler(message: types.Message):
+    #print("Команда /start вызвана") #отладочный ввод
+    await message.answer(f"Привет, {message.from_user.full_name}!\n"
+                         f"Твой ID: {message.from_user.id}")
+
+@router.message(Command("help"))
+async def help_handler(message: types.Message):
+    await message.answer("Доступные команды:\n"
+                         "/start - Начать\n"
+                         "/help - Справка\n"
+                         "/status - Статус")
+
+# @router.message(Command("status"))
+# async def status_handler(message: types.Message):
+#     await message.answer(f"Ваш ID: {message.from_user.id}\n"
+#                          f"Ваш username: @{message.from_user.username}")
 from aiogram.filters import Command
 from .keyboard import keyboard  # импорт из клавиатур
 from .callbacks import callback_message  # импорт из коллбека
 
 
-async def process_start_command(message: types.Message):
-    '''Команда start'''
-    await message.answer(text="Привет!")
+
 
 
 # Здесь описывается маршрутизация
+
 def register_message_handlers():
-    '''Маршрутизация обработчиков'''
+    """''Маршрутизация обработчиков''"""
     pass
