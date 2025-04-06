@@ -2,6 +2,8 @@ __all__ = [
     "router",
 ]
 
+import logging
+
 # TODO - Опишите вызов функций обработчиков через маршрутизацию
 # Работа c Router - https://docs.aiogram.dev/en/v3.14.0/dispatcher/router.html
 # Пример работы с Router через декораторы @router - https://mastergroosha.github.io/aiogram-3-guide/routers/
@@ -9,7 +11,6 @@ __all__ = [
 
 
 from aiogram import types, Router
-from aiogram.types import Message
 from aiogram.filters import Command
 #создание экземпляра объекта Router
 router=Router()
@@ -18,6 +19,8 @@ async def start_handler(message: types.Message):
     #print("Команда /start вызвана") #отладочный ввод
     await message.answer(f"Привет, {message.from_user.full_name}!\n"
                          f"Твой ID: {message.from_user.id}")
+    logging.info(f"Пользователь с id={message.from_user.id} запустил бота ")
+
 
 @router.message(Command("help"))
 async def help_handler(message: types.Message):
@@ -25,6 +28,11 @@ async def help_handler(message: types.Message):
                          "/start - Начать\n"
                          "/help - Справка\n"
                          "/status - Статус")
+@router.message()
+async def echo_message(message:types.Message):
+    logging.debug(f"Пользователь с id={message.from_user.id} прислал необрабатываемую команду ")
+    await message.answer("Неизвестная команда.Выведите /help для списка доступных")
+
 
 # @router.message(Command("status"))
 # async def status_handler(message: types.Message):
