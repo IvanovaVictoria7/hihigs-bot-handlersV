@@ -4,7 +4,8 @@ from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
 from config import TOKEN
 
-bot = Bot(token = TOKEN)
+# тест клавиатур
+from handlers.keyboard import main_keyboard
 
 #экземпляр бота
 bot = Bot(token="Your Token")
@@ -15,7 +16,7 @@ dp = Dispatcher()
 # Создадим хендлер - обработчик сообщений, и будет возвращать сообщение
 @dp.message(Command('start'))
 async def process_start_command(message):
-    await message.answer("Привет!")
+    await message.answer("Привет!", reply_markup=main_keyboard)
 
 
 @dp.message()
