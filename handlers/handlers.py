@@ -24,11 +24,6 @@ async def help_handler(message: types.Message):
                          "/help - Справка\n"
                          "/status - Статус")
 
-@router.message()
-async def echo_message(message:types.Message):
-    logging.debug(f"Пользователь с id={message.from_user.id} прислал необрабатываемую команду ")
-    await message.answer("Неизвестная команда.Выведите /help для списка доступных")
-
 @router.message(lambda message: message.text == "📖 О нас")
 async def about_handler(message: types.Message):
     await message.answer("Это информация о нас!")
@@ -36,3 +31,8 @@ async def about_handler(message: types.Message):
 @router.message(lambda message: message.text == "👤 Профиль")
 async def profile_handler(message: types.Message):
     await message.answer(f"Ваш профиль: ID {message.from_user.id}")
+
+@router.message()
+async def echo_message(message:types.Message):
+    logging.debug(f"Пользователь с id={message.from_user.id} прислал необрабатываемую команду ")
+    await message.answer("Неизвестная команда.Выведите /help для списка доступных")
