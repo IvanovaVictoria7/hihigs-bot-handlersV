@@ -1,8 +1,5 @@
-from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
+import aiogram.types
 
-main_keyboard_list = [KeyboardButton(text="Статус"),]
-
-main_keyboard = ReplyKeyboardMarkup (keyboard=main_keyboard_list, resize_keyboard=True, one_time_keyboard=True)
 
 # TODO - создайте клавиатуру, которая будет появляться в сообщении либо находится там постоянно
 # Статичная клавиатура ReplyKeyboardMarkup https://docs.aiogram.dev/en/v3.15.0/api/types/reply_keyboard_markup.html
