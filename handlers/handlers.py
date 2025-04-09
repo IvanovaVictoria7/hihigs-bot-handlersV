@@ -24,7 +24,7 @@ async def start_handler(message: types.Message):
 
 @router.message(Command("help"))
 async def help_handler(message: types.Message):
-    await message.answer("Доступные команды:\n"
+    await message.answer(text="Доступные команды:\n"
                          "/start - Начать\n"
                          "/help - Справка\n"
                          "/status - Статус")
