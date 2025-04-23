@@ -11,8 +11,7 @@ router=Router()
 
 @router.message(Command(commands=["start", "status"]))
 async def start_handler(message: types.Message):
-    await message.answer(f"Привет, {message.from_user.full_name}!\n"
-                         f"Твой ID: {message.from_user.id}",
+    await message.answer(f"Привет, {message.from_user.full_name}!\nТвой ID: {message.from_user.id}",
                          reply_markup=get_main_keyboard())
     logging.info(f"Пользователь с id={message.from_user.id} запустил бота ")
 
@@ -36,3 +35,4 @@ async def profile_handler(message: types.Message):
 async def echo_message(message:types.Message):
     logging.debug(f"Пользователь с id={message.from_user.id} прислал необрабатываемую команду ")
     await message.answer("Неизвестная команда.Выведите /help для списка доступных")
+
