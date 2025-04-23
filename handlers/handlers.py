@@ -35,3 +35,4 @@ async def profile_handler(message: types.Message):
 async def echo_message(message:types.Message):
     logging.debug(f"Пользователь с id={message.from_user.id} прислал необрабатываемую команду ")
     await message.answer("Неизвестная команда.Выведите /help для списка доступных")
+
