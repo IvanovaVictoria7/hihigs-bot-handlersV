@@ -19,10 +19,6 @@ def test_env_file_exists():
 
 
 def test_env_variable_loaded():
-testing
-    load_dotenv() 
-
     load_dotenv()
- testing
     bot_token = os.getenv("TOKEN")
     assert bot_token, "TOKEN не найден в переменных окружения"
