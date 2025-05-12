@@ -1,11 +1,14 @@
 # version1.0.0
 import asyncio
-from aiogram import Bot, Dispatcher
+import logging
+
+from aiogram import Bot, Dispatcher,types
 from config import TOKEN
-from handlers import router as handlers_router
+from handlers import router as handlers_router,bot_commands
 from handlers.callbacks import router as callbacks_router
 from handlers.bot_commands import set_my_commands
 from utils import setup_logger
+from db import async_create_table
 
 
 
@@ -22,7 +25,7 @@ async def main():
     await set_my_commands(bot)
 
     # # Установить общий уровень логирования
-    # logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
 
     # запуск логирования
     setup_logger(fname=__name__)
@@ -32,4 +35,8 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(async_create_table())
+        asyncio.run(main())
+    except(KeyboardInterrupt,SystemExit):
+        logging.info("End Script")
