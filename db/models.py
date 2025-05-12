@@ -3,14 +3,8 @@ __all__ = [
     "Base",
 ]
 
-# Про ORM-паттерн асинхронного sqlalchemy и модели
-# https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html#synopsis-orm
-
-# декларативная модель базы данных python
-# https://metanit.com/python/database/3.2.php
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import Column, DATE, Integer, VARCHAR, Text
-from datetime import datetime
+from sqlalchemy import Column, Integer, VARCHAR, Text
 
 class Base(DeclarativeBase):
     pass
@@ -18,8 +12,8 @@ class Base(DeclarativeBase):
 class User(Base):
     __tablename__ = "user_table"
     user_id = Column(Integer, primary_key=True)
-    user_name = Column(VARCHAR(255), unique=False, nullable=False)
-    tutorcode = Column(VARCHAR(6), unique=False)
-    subscribe = Column(VARCHAR(6), unique=False)
-    extra = Column(Text, unique=False)
+    user_name = Column(VARCHAR(255), nullable=False, default="Unknown")
+    tutorcode = Column(VARCHAR(6), nullable=True)
+    subscribe = Column(VARCHAR(6), nullable=True)
+    extra = Column(Text, nullable=True)
 
