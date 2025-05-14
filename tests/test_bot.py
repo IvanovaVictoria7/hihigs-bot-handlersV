@@ -50,7 +50,7 @@ async def test_callbacks_handler(mock_router, mock_callback_query):
     assert called_args[0] == "Вы нажали кнопку!"
 
 
-
+    #TODO - техдолг: переделать тесты
 
 
 
