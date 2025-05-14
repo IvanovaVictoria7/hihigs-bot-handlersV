@@ -1,56 +1,75 @@
-__all__ = ["router"]
-
-from aiogram import types, Router,F
-from sqlalchemy import select
-from db import async_session, User
-from .keyboard import get_main_keyboard, get_continue_keyboard, get_role_selection_keyboard
 import logging
+from aiogram import types, Router
 from aiogram.filters import Command
-from .callbacks import router as callback_router
+from sqlalchemy import select, insert
+from .keyboard import keyboard_start
+from db import async_session, User
 
 router = Router()
 
-# Объединённый обработчик /start и /status с проверкой пользователя
-@router.message(Command(commands=["start", "status"]))
-async def start_handler(message: types.Message):
+@router.message(Command(commands=["start"]))
+async def command_start_handler(message: types.Message):
     async with async_session() as session:
         query = select(User).where(User.user_id == message.from_user.id)
         result = await session.execute(query)
-
-        if result.scalars().all():
-            # Пользователь найден в БД
-            await message.answer(
-                f"Привет, {message.from_user.full_name}!\nТвой ID: {message.from_user.id}",
-                reply_markup=get_main_keyboard()
-            )
-            logging.info(f"Пользователь с id={message.from_user.id} запустил бота ")
+        user = result.scalar()
+        if user:
+            await message.answer("Вы уже зарегистрированы! Проверьте статус: /status")
         else:
-            # Пользователь не найден — предложить выбрать роль
-            await message.answer(
-                text="Выберите роль",
-                reply_markup=get_role_selection_keyboard()
-            )
+            await message.answer("Выберите роль:", reply_markup=keyboard_start)
+    logging.info(f"Пользователь {message.from_user.id} запустил бота")
 
-# Хендлер справки
+@router.message(Command(commands=["status"]))
+async def command_status_handler(message: types.Message):
+    async with async_session() as session:
+        query = select(User).where(User.user_id == message.from_user.id)
+        result = await session.execute(query)
+        user = result.scalar()
+        if not user:
+            await message.answer("Вы не зарегистрированы. Нажмите /start")
+            return
+        info = f"UserId: {user.user_id}\nUserName: {user.user_name}"
+        if user.tutorcode:
+            info += f"\nКод преподавателя: {user.tutorcode}"
+        elif user.subscribe:
+            query = select(User).where(User.tutorcode == user.subscribe)
+            result = await session.execute(query)
+            tutor = result.scalar()
+            tutor_name = tutor.user_name if tutor else "Неизвестно"
+            info += f"\nПреподаватель: {tutor_name}"
+        await message.answer(info)
+    logging.info(f"Статус для {message.from_user.id}")
+
+@router.message(lambda message: message.text.startswith("tutorcode-"))
+async def handle_tutorcode_input(message: types.Message):
+    async with async_session() as session:
+        code = message.text.split("-")[1]
+        new_user = {
+            "user_id": message.from_user.id,
+            "user_name": message.from_user.username or "Unknown",
+            "subscribe": code
+        }
+        await session.execute(insert(User).values(**new_user))
+        await session.commit()
+        await message.answer("Вы зарегистрированы как слушатель! Проверьте статус: /status")
+    logging.info(f"Пользователь {message.from_user.id} зарегистрирован как слушатель")
+
 @router.message(Command("help"))
 async def help_handler(message: types.Message):
     await message.answer(text="Доступные команды:\n"
-                              "/start - Начать\n"
-                              "/help - Справка\n"
-                              "/status - Статус")
+                         "/start - Начать\n"
+                         "/help - Справка\n"
+                         "/status - Статус")
 
-# Кнопка "О нас"
 @router.message(lambda message: message.text == "📖 О нас")
 async def about_handler(message: types.Message):
     await message.answer("Это информация о нас!")
 
-# Кнопка "Профиль"
 @router.message(lambda message: message.text == "👤 Профиль")
 async def profile_handler(message: types.Message):
     await message.answer(f"Ваш профиль: ID {message.from_user.id}")
 
-# Хендлер на неизвестные команды
 @router.message()
-async def echo_message(message: types.Message):
+async def echo_message(message:types.Message):
     logging.debug(f"Пользователь с id={message.from_user.id} прислал необрабатываемую команду ")
-    await message.answer("Неизвестная команда. Введите /help для списка доступных.")
+    await message.answer("Неизвестная команда.Выведите /help для списка доступных")
