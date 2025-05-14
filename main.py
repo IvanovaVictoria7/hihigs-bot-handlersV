@@ -1,13 +1,12 @@
 # version1.0.0
 import asyncio
-import logging
 from aiogram import Bot, Dispatcher
 from config import TOKEN
 from handlers import router as handlers_router
 from handlers.callbacks import router as callbacks_router
 from handlers.bot_commands import set_my_commands
 from utils import setup_logger
-from db import async_create_table
+
 
 
 async def main():
@@ -22,11 +21,15 @@ async def main():
     # Здесь вызов меню с командами бота
     await set_my_commands(bot)
 
-    setup_logger()
+    # # Установить общий уровень логирования
+    # logging.basicConfig(level=logging.DEBUG)
 
+    # запуск логирования
+    setup_logger(fname=__name__)
+
+    # Запуск бота в polling-режиме
     await dp.start_polling(bot)
 
+
 if __name__ == "__main__":
-    asyncio.run(async_create_table())
     asyncio.run(main())
-    logging.info("Бот остановлен")

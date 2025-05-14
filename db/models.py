@@ -17,5 +17,3 @@ class User(Base):
     subscribe = Column(VARCHAR(6), nullable=True)
     extra = Column(Text, nullable=True)
 
-
-
