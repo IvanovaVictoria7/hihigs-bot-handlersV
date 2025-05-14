@@ -1,5 +1,4 @@
-from aiogram.types import KeyboardButton, ReplyKeyboardMarkup,InlineKeyboardMarkup, InlineKeyboardButton
-
+from aiogram.types import KeyboardButton, ReplyKeyboardMarkup,  InlineKeyboardMarkup, InlineKeyboardButton
 
 def get_main_keyboard():
     keyboard = ReplyKeyboardMarkup(
@@ -10,24 +9,14 @@ def get_main_keyboard():
         one_time_keyboard=False  # Клавиатура остаётся после нажатия (можно сделать True, чтобы исчезала)
     )
     return keyboard
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup
 
+button_continue = InlineKeyboardButton(text="Далее", callback_data="button_continue")
+button_tutor = InlineKeyboardButton(text="Слушатель", callback_data="button_student")
+button_student = InlineKeyboardButton(text="Преподаватель", callback_data="button_tutor")
 
-def get_continue_keyboard():
-    button_continue = InlineKeyboardButton(text="Далее", callback_data="button_continue")
-    keyboard = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [button_continue]
-        ]
-    )
-    return keyboard
-
-def get_role_selection_keyboard():
-    button_tutor = InlineKeyboardButton(text="Преподаватель", callback_data="button_tutor")
-    button_student = InlineKeyboardButton(text="Ученик", callback_data="button_student")
-    keyboard = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [button_student, button_tutor]
-        ]
-    )
-    return keyboard
+keyboard_continue = InlineKeyboardMarkup(inline_keyboard=[
+    [button_continue]
+])
+keyboard_start = InlineKeyboardMarkup(inline_keyboard=[
+    [button_student, button_tutor]
+])
