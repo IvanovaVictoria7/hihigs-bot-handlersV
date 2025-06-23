@@ -1,4 +1,6 @@
 import logging
+
+import Update
 from aiogram import types, Router
 from aiogram.filters import Command
 from sqlalchemy import select, insert
