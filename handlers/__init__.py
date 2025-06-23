@@ -1,14 +1,12 @@
-# Файл __init__.py.py позволяет обращаться к папке как к модулю
-# и импортировать из него содержимое
+from aiogram import Bot
+from aiogram.types import BotCommand
 
-from .handlers import router
-from .bot_commands import set_my_commands
-from .logging import setup_logger
-from .keyboard import get_main_keyboard
-
-from .handlers import router as main_router
-from .bot_commands.load import router as load_router
-
-router = Router()
-router.include_router(main_router)
-router.include_router(load_router)
+async def set_my_commands(bot: Bot):
+    commands = [
+        BotCommand(command="start", description="Запустить бота"),
+        BotCommand(command="help", description="Помощь"),
+        BotCommand(command="status", description="Информация о пользователе"),
+        BotCommand(command="load", description="Загрузить профили Codewars"),
+        BotCommand(command="getres", description="Получить результаты по задачам"),
+    ]
+    await bot.set_my_commands(commands)
