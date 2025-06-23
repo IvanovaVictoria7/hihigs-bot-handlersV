@@ -1,35 +1,42 @@
-# version1.0.0
+# version 1.0.0
 import asyncio
 import logging
+import sys
+from os import name as os_name
+
 from aiogram import Bot, Dispatcher
 from config import TOKEN
 from handlers import router as handlers_router
 from handlers.callbacks import router as callbacks_router
 from handlers.bot_commands import set_my_commands
-from utils import setup_logger
+from utils.logging import setup_logger
 from db import async_create_table
 
 
 async def main():
     setup_logger()
-    #создание таблиц 1 р
+    # Создание таблиц (вызывается один раз)
     await async_create_table()
 
     bot = Bot(token=TOKEN)
     dp = Dispatcher()
 
-    # Здесь функция для вызова хендлеров из handlers.py
+    # Подключаем все хендлеры
     dp.include_router(handlers_router)
     dp.include_router(callbacks_router)
 
-    # Здесь вызов меню с командами бота
+    # Устанавливаем команды бота
     await set_my_commands(bot)
 
-    setup_logger()
-
+    # Запускаем бота
     await dp.start_polling(bot)
 
+
 if __name__ == "__main__":
-    asyncio.run(async_create_table())
-    asyncio.run(main())
-    logging.info("Бот остановлен")
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logging.info("Бот остановлен")
+    except Exception as e:
+        logging.error(f"Ошибка: {e}")
+        sys.exit(1)

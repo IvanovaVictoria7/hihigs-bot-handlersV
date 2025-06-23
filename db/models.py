@@ -43,3 +43,10 @@ class Task(Base):
 
     profile: Mapped["Profile"] = relationship(back_populates="tasks")
 
+
+class Profile:
+    pass
+
+
+class Task:
+    pass
