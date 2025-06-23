@@ -4,6 +4,7 @@ from aiogram.filters import Command
 from sqlalchemy import select, insert
 from .keyboard import keyboard_start
 from db import async_session, User
+from utils.logging import logger
 
 router = Router()
 
@@ -31,6 +32,7 @@ async def command_status_handler(message: types.Message):
         info = f"UserId: {user.user_id}\nUserName: {user.user_name}"
         if user.tutorcode:
             info += f"\nКод преподавателя: {user.tutorcode}"
+            info += "\n\nВведите /load чтобы загрузить Codewars-профили студентов."
         elif user.subscribe:
             query = select(User).where(User.tutorcode == user.subscribe)
             result = await session.execute(query)
@@ -38,7 +40,7 @@ async def command_status_handler(message: types.Message):
             tutor_name = tutor.user_name if tutor else "Неизвестно"
             info += f"\nПреподаватель: {tutor_name}"
         await message.answer(info)
-    logging.info(f"Статус для {message.from_user.id}")
+    logging.info(f"Пользователь {message.from_user.id} запросил статус")
 
 @router.message(lambda message: message.text.startswith("tutorcode-"))
 async def handle_tutorcode_input(message: types.Message):
