@@ -11,6 +11,9 @@ from db import async_create_table
 
 
 async def main():
+    setup_logger()
+    #создание таблиц 1 р
+    await async_create_table()
 
     bot = Bot(token=TOKEN)
     dp = Dispatcher()
