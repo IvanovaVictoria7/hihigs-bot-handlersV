@@ -1,20 +1,15 @@
-from aiogram import Bot
-from aiogram.types import BotCommand
 
-async def set_my_commands(bot: Bot):
-    commands = [
-        BotCommand(command="start", description="Запустить бота"),
-        BotCommand(command="help", description="Помощь"),
-        BotCommand(command="status", description="Информация о пользователе"),
-        BotCommand(command="load", description="Загрузить профили Codewars"),
-        BotCommand(command="getres", description="Получить результаты по задачам"),
-    ]
-    await bot.set_my_commands(commands)
+from .handlers import router as router
+from .callbacks import router as callbacks_router
+from .bot_commands import set_my_commands
+from .logging import setup_logger
+from .keyboard import get_main_keyboard
 
 
-def router():
-    return None
-
-
-def setup_handlers():
-    return None
+__all__ = [
+    "router",
+    "set_my_commands",
+    "setup_logger",
+    "get_main_keyboard",
+    "callbacks_router"
+]

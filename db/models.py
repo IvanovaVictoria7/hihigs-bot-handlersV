@@ -2,51 +2,56 @@ __all__ = [
     "User",
     "Base",
     "Profile",
-    "Task"
+    "Task",
+    "Subscription"
 ]
 
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy import Column, Integer, VARCHAR, Text, ForeignKey, String
-from typing import Optional, List
+from sqlalchemy import Column, Integer, Text, ForeignKey, VARCHAR
+from sqlalchemy.orm import declarative_base, relationship
 
-class Base(DeclarativeBase):
-    pass
+Base = declarative_base()
+
 
 class User(Base):
-    __tablename__ = "user_table"
-    user_id: Mapped[int] = mapped_column(primary_key=True)
-    user_name: Mapped[str] = mapped_column(VARCHAR(255), nullable=False, default="Unknown")
-    tutorcode: Mapped[Optional[str]] = mapped_column(VARCHAR(6), nullable=True)
-    subscribe: Mapped[Optional[str]] = mapped_column(VARCHAR(6), nullable=True)
-    extra: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    __tablename__ = "users"
 
-    profiles: Mapped[List["Profile"]] = relationship(back_populates="owner", cascade="all, delete-orphan")
+    user_id = Column(Integer,primary_key=True)
+    user_name = Column(VARCHAR(255),nullable=False, default="Unknown")
+    role = Column(VARCHAR(20),nullable=False, default="student")  # student или teacher
+    extra = Column(Text,nullable=True)
+
+    profiles = relationship("Profile",      back_populates="owner")
+    students = relationship("Subscription", back_populates="teacher", foreign_keys="[Subscription.teacher_id]")
+    teachers = relationship("Subscription", back_populates="student", foreign_keys="[Subscription.student_id]")
 
 
 class Profile(Base):
-    tablename = "profile_table"
+    __tablename__ = "profiles"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("user_table.user_id"))
-    profile_url: Mapped[str] = mapped_column(String(255))
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.user_id"))
+    profile_url = Column(VARCHAR(255), nullable=False)
 
-    owner: Mapped["User"] = relationship(back_populates="profiles")
-    tasks: Mapped[List["Task"]] = relationship(back_populates="profile", cascade="all, delete-orphan")
+    owner = relationship("User",back_populates="profiles")
+    tasks = relationship("Task", back_populates="profile")
 
 
 class Task(Base):
-    tablename = "task_table"
+    __tablename__ = "tasks"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    profile_id: Mapped[int] = mapped_column(ForeignKey("profile_table.id"))
-    task_name: Mapped[str] = mapped_column(String(255))
+    id = Column(Integer, primary_key=True)
+    profile_id = Column(Integer, ForeignKey("profiles.id"))
+    task_name = Column(VARCHAR(255), nullable=False)
 
-    profile: Mapped["Profile"] = relationship(back_populates="tasks")
-
-
-class Profile:
-    pass
+    profile = relationship("Profile", back_populates="tasks")
 
 
-class Task:
-    pass
+class Subscription(Base):
+    __tablename__ = "subscriptions"
+
+    id = Column(Integer, primary_key=True)
+    teacher_id = Column(Integer, ForeignKey("users.user_id"))
+    student_id = Column(Integer, ForeignKey("users.user_id"))
+
+    teacher = relationship("User", back_populates="students", foreign_keys=[teacher_id])
+    student = relationship("User", back_populates="teachers", foreign_keys=[student_id])
