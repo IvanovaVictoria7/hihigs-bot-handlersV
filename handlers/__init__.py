@@ -10,3 +10,11 @@ async def set_my_commands(bot: Bot):
         BotCommand(command="getres", description="Получить результаты по задачам"),
     ]
     await bot.set_my_commands(commands)
+
+
+def router():
+    return None
+
+
+def setup_handlers():
+    return None
