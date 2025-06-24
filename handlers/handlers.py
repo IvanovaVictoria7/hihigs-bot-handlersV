@@ -78,7 +78,7 @@ async def command_load_handler(message: types.Message):
 
         session.add_all(new_profiles)
         await session.commit()
-        await message.answer(f"✅ Загружено новых профилей: {len(new_profiles)}")
+        await message.answer(f" Загружено новых профилей: {len(new_profiles)}")
 
 
 @router.message(Command("getres"))
@@ -156,3 +156,5 @@ async def command_getres_handler(message: types.Message):
     async def echo_message(message: types.Message):
         logging.debug(f"Пользователь {message.from_user.id} прислал необрабатываемую команду")
         await message.answer("Неизвестная команда. Выведите /help для списка доступных.")
+
+        

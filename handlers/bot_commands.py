@@ -1,3 +1,4 @@
+
 __all__ = ["set_my_commands"]
 
 from aiogram import Bot
@@ -11,3 +12,6 @@ async def set_my_commands(bot: Bot):
         BotCommand(command="getres", description="Показать выполненные задачи"),
     ]
     await bot.set_my_commands(commands)
+
+      
+
