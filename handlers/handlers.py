@@ -89,33 +89,6 @@ import re
 users = {}  # {user_id: {'subscribed': bool, 'profiles': list}}
 checked_tasks = {}  # {profile_url: set(task_ids)}
 
-
-# 1. Обработчик /start
-def start(update: Update, context: CallbackContext) -> None:
-    user_id = update.effective_user.id
-    if user_id not in users:
-        users[user_id] = {'subscribed': False, 'profiles': []}
-    update.message.reply_text(
-        "Добро пожаловать! Я бот для проверки задач Codewars.\n"
-        "Используйте /status для просмотра статуса."
-    )
-
-
-# 2. Обработчик /status
-def status(update: Update, context: CallbackContext) -> None:
-    user_id = update.effective_user.id
-    if user_id not in users:
-        update.message.reply_text("Вы не зарегистрированы. Используйте /start")
-        return
-
-    status_text = "Ваш статус:\n"
-    status_text += f"Подписка: {'активна' if users[user_id]['subscribed'] else 'не активна'}\n"
-    status_text += f"Загружено профилей: {len(users[user_id]['profiles'])}\n"
-    status_text += "Используйте /load для загрузки профилей"
-
-    update.message.reply_text(status_text)
-
-
 # 3. Обработчик /load
 def load(update: Update, context: CallbackContext) -> None:
     user_id = update.effective_user.id
@@ -188,7 +161,5 @@ def notify_subscribers(update: Update, context: CallbackContext, message: str) -
 
 def setup_handlers(updater: Updater) -> None:
     dp = updater.dispatcher
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CommandHandler("status", status))
     dp.add_handler(CommandHandler("load", load))
     dp.add_handler(CommandHandler("getres", getres))
