@@ -14,3 +14,7 @@ async def set_my_commands(bot: Bot):
 
 def router():
     return None
+
+
+def setup_handlers():
+    return None
