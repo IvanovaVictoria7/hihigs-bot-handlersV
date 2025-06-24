@@ -33,3 +33,19 @@ if name == "__main__":  #  исправлено с name → name
     asyncio.run(async_create_table())  # создаём таблицы в БД
     asyncio.run(main())
     logging.info("Бот остановлен")
+
+from telegram.ext import Updater
+from handlers import setup_handlers
+
+
+def main() -> None:
+    updater = Updater("7706411868:AAEjg7NEHAqryZ3xPNaSKMFUmU2smFIlv1Y")
+
+    setup_handlers(updater)
+
+    updater.start_polling()
+    updater.idle()
+
+
+if __name__ == '__main__':
+    main()
