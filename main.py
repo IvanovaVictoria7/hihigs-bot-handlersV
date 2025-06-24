@@ -8,12 +8,12 @@ from config import TOKEN
 from handlers import router as handlers_router
 from handlers.callbacks import router as callbacks_router
 from handlers.bot_commands import set_my_commands
-from utils.logging import setup_logger  # ✅ импорт логгера
+from utils.logging import setup_logger  #  импорт логгера
 from db import async_create_table
 
 
 async def main():
-    setup_logger()  # ✅ логгер нужно вызывать до запуска
+    setup_logger()  #  логгер нужно вызывать до запуска
 
     bot = Bot(token=TOKEN)
     dp = Dispatcher()
@@ -29,7 +29,7 @@ async def main():
     await dp.start_polling(bot)
 
 
-if name == "__main__":  # ✅ исправлено с name → name
+if name == "__main__":  #  исправлено с name → name
     asyncio.run(async_create_table())  # создаём таблицы в БД
     asyncio.run(main())
     logging.info("Бот остановлен")
