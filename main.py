@@ -39,7 +39,7 @@ from handlers import setup_handlers
 
 
 def main() -> None:
-    updater = Updater("7706411868:AAEjg7NEHAqryZ3xPNaSKMFUmU2smFIlv1Y")
+    updater = Updater(TOKEN)
 
     setup_handlers(updater)
 
