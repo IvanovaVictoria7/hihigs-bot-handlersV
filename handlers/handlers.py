@@ -1,9 +1,11 @@
 import logging
+from utils.parser import parse_codewars_profile
 from aiogram import types, Router
 from aiogram.filters import Command
 from sqlalchemy import select, insert
 from db import async_session, User, Profile, Task, Subscription
 from .keyboard import keyboard_start
+
 
 router = Router()
 
@@ -33,8 +35,8 @@ async def command_status_handler(message: types.Message):
         info = f"UserId: {user.user_id}\nUserName: {user.user_name}"
         if user.tutorcode:
             info += f"\nКод преподавателя: {user.tutorcode}"
-        elif user.subscribe:
-            query = select(User).where(User.tutorcode == user.subscribe)
+        elif user.teachers:
+            query = select(User).where(User.tutorcode == user.teachers)
             result = await session.execute(query)
             tutor = result.scalar()
             tutor_name = tutor.user_name if tutor else "Неизвестно"
@@ -48,6 +50,7 @@ async def command_status_handler(message: types.Message):
 @router.message(Command("load"))
 async def command_load_handler(message: types.Message):
     async with async_session() as session:
+        # Проверка регистрации
         query = select(User).where(User.user_id == message.from_user.id)
         result = await session.execute(query)
         user = result.scalar()
@@ -56,6 +59,7 @@ async def command_load_handler(message: types.Message):
             await message.answer("Вы не зарегистрированы. Сначала введите /start")
             return
 
+        # Парсим список URL-ов
         text = message.text.replace("/load", "").strip()
         urls = [url.strip() for url in text.split(",") if url.strip()]
 
@@ -63,6 +67,7 @@ async def command_load_handler(message: types.Message):
             await message.answer("Пожалуйста, укажите хотя бы один URL профиля через запятую.")
             return
 
+        # Проверяем существующие профили
         existing_query = select(Profile.profile_url).where(Profile.user_id == user.user_id)
         existing_result = await session.execute(existing_query)
         existing_urls = set(row[0] for row in existing_result.all())
@@ -76,10 +81,37 @@ async def command_load_handler(message: types.Message):
             await message.answer("Эти профили уже были добавлены ранее.")
             return
 
+        # Добавляем профили в БД
         session.add_all(new_profiles)
         await session.commit()
-        await message.answer(f" Загружено новых профилей: {len(new_profiles)}")
 
+        added_count = 0
+        failed_urls = []
+
+        # Обрабатываем каждый новый профиль
+        for profile in new_profiles:
+            db_profile = await session.scalar(
+                select(Profile).where(
+                    Profile.user_id == user.user_id,
+                    Profile.profile_url == profile.profile_url
+                )
+            )
+            try:
+                tasks = await parse_codewars_profile(profile.profile_url)
+                for task in tasks:
+                    session.add(Task(profile_id=db_profile.id, task_name=task))
+                added_count += 1
+            except Exception as e:
+                failed_urls.append(f"{profile.profile_url} ({str(e)})")
+
+        await session.commit()
+
+        # Ответ пользователю
+        response = f"✅ Загружено новых профилей: {added_count}\n"
+        if failed_urls:
+            response += "⚠️ Ошибки при парсинге:\n" + "\n".join(failed_urls)
+
+        await message.answer(response)
 
 @router.message(Command("getres"))
 async def command_getres_handler(message: types.Message):
@@ -121,40 +153,38 @@ async def command_getres_handler(message: types.Message):
 
     logging.info(f"Проверка задач по /getres — {message.from_user.id}")
 
-    @router.message(Command("help"))
-    async def help_handler(message: types.Message):
-        await message.answer(text="Доступные команды:\n"
+@router.message(Command("help"))
+async def help_handler(message: types.Message):
+    await message.answer(text="Доступные команды:\n"
                                   "/start - Начать\n"
                                   "/help - Справка\n"
                                   "/status - Статус\n"
                                   "/load - Загрузить профили Codewars\n"
                                   "/getres - Задачи студентов (для преподавателей)")
 
-    @router.message(lambda message: message.text.startswith("tutorcode-"))
-    async def handle_tutorcode_input(message: types.Message):
-        async with async_session() as session:
-            code = message.text.split("-")[1]
-            new_user = {
-                "user_id": message.from_user.id,
-                "user_name": message.from_user.username or "Unknown",
-                "subscribe": code
-            }
-            await session.execute(insert(User).values(**new_user))
-            await session.commit()
-            await message.answer("Вы зарегистрированы как слушатель! Проверьте статус: /status")
-        logging.info(f"Пользователь {message.from_user.id} зарегистрирован как слушатель")
+@router.message(lambda message: message.text.startswith("tutorcode-"))
+async def handle_tutorcode_input(message: types.Message):
+    async with async_session() as session:
+        code = message.text.split("-")[1]
+        new_user = {
+            "user_id": message.from_user.id,
+            "user_name": message.from_user.username or "Unknown",
+            "subscribe": code
+        }
+        await session.execute(insert(User).values(**new_user))
+        await session.commit()
+        await message.answer("Вы зарегистрированы как слушатель! Проверьте статус: /status")
+    logging.info(f"Пользователь {message.from_user.id} зарегистрирован как слушатель")
 
-    @router.message(lambda message: message.text == "📖 О нас")
-    async def about_handler(message: types.Message):
-        await message.answer("Это информация о нас!")
+@router.message(lambda message: message.text == "📖 О нас")
+async def about_handler(message: types.Message):
+    await message.answer("Это информация о нас!")
 
-    @router.message(lambda message: message.text == "👤 Профиль")
-    async def profile_handler(message: types.Message):
-        await message.answer(f"Ваш профиль: ID {message.from_user.id}")
+@router.message(lambda message: message.text == "👤 Профиль")
+async def profile_handler(message: types.Message):
+    await message.answer(f"Ваш профиль: ID {message.from_user.id}")
 
-    @router.message()
-    async def echo_message(message: types.Message):
-        logging.debug(f"Пользователь {message.from_user.id} прислал необрабатываемую команду")
-        await message.answer("Неизвестная команда. Выведите /help для списка доступных.")
-
-        
+@router.message()
+async def echo_message(message: types.Message):
+    logging.debug(f"Пользователь {message.from_user.id} прислал необрабатываемую команду")
+    await message.answer("Неизвестная команда. Выведите /help для списка доступных.")

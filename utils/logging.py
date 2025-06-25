@@ -3,7 +3,9 @@ import os
 import sys
 
 
-def setup_logger(level: int = logging.INFO, fname: str ="bot ") -> None:
+def setup_logger(level: int = logging.INFO, fname: str = "bot") -> None:
+    log_dir = "logs"
+    os.makedirs(log_dir,exist_ok=True)
     logging.basicConfig(
         format="%(asctime)s %(levelname)s | %(name)s: %(message)s",
         datefmt="[%d-%m-%Y %H:%M:%S]",
