@@ -8,14 +8,18 @@ from handlers.callbacks import router as callbacks_router
 from handlers.bot_commands import set_my_commands
 from utils import setup_logger
 from db import async_create_table
+from handlers.logging import setup_logger
+
 
 async def main():
-    setup_logger()  # ← логгер нужно запускать перед всем, чтобы ловить ошибки
+
+    setup_logger()
 
     await async_create_table()  # создаём таблицы в БД
 
     bot = Bot(token=TOKEN)
     dp = Dispatcher()
+
 
     # Подключаем хендлеры
     dp.include_router(handlers_router)
