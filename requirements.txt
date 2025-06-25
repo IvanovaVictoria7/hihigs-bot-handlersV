@@ -29,3 +29,5 @@ SQLAlchemy==2.0.40
 tomli==2.2.1
 typing_extensions==4.7.1
 yarl==1.18.3
+aiohttp
+beautifulsoup4
