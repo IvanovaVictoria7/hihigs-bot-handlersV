@@ -2,6 +2,7 @@ __all__ = ["set_my_commands"]
 
 from aiogram import Bot
 from aiogram.types import BotCommand
+from utils.parser import parse_codewars_profile
 
 async def set_my_commands(bot: Bot):
     commands = [
