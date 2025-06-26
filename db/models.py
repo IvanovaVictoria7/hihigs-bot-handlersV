@@ -6,7 +6,7 @@ __all__ = [
     "Subscription"
 ]
 
-from sqlalchemy import Column, Integer, Text, ForeignKey, VARCHAR
+from sqlalchemy import Column, Integer, Text, ForeignKey, VARCHAR, Boolean
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
@@ -17,10 +17,9 @@ class User(Base):
 
     user_id = Column(Integer,primary_key=True)
     user_name = Column(VARCHAR(255),nullable=False, default="Unknown")
-    role = Column(VARCHAR(20),nullable=False, default="student")  # student или teacher
+    role = Column(VARCHAR(20),nullable=False, default="student") # student или teacher
+    tutorcode = Column(VARCHAR(6), nullable=True, unique=True)  # Поле для кода преподавателя
     extra = Column(Text,nullable=True)
-    tutorcode = Column(VARCHAR(100), nullable=True)
-
 
     profiles = relationship("Profile",      back_populates="owner")
     students = relationship("Subscription", back_populates="teacher", foreign_keys="[Subscription.teacher_id]")
@@ -54,6 +53,8 @@ class Subscription(Base):
     id = Column(Integer, primary_key=True)
     teacher_id = Column(Integer, ForeignKey("users.user_id"))
     student_id = Column(Integer, ForeignKey("users.user_id"))
+    active = Column(Boolean, default=True)
 
     teacher = relationship("User", back_populates="students", foreign_keys=[teacher_id])
     student = relationship("User", back_populates="teachers", foreign_keys=[student_id])
+

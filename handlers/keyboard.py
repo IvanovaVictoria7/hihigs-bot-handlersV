@@ -9,7 +9,7 @@ from aiogram.types import (
 def get_main_keyboard():
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text=" О нас"), KeyboardButton(text=" Профиль")]
+            [KeyboardButton(text="📖 О нас"), KeyboardButton(text="👤 Профиль")]
         ],
         resize_keyboard=True,
         one_time_keyboard=False
