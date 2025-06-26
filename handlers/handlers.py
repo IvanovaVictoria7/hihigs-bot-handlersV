@@ -28,24 +28,28 @@ async def command_status_handler(message: types.Message):
         query = select(User).where(User.user_id == message.from_user.id)
         result = await session.execute(query)
         user = result.scalar()
+
         if not user:
             await message.answer("Вы не зарегистрированы. Нажмите /start")
             return
 
         info = f"UserId: {user.user_id}\nUserName: {user.user_name}"
+
         if user.tutorcode:
             info += f"\nКод преподавателя: {user.tutorcode}"
-        elif user.teachers:
-            query = select(User).where(User.tutorcode == user.teachers)
+        else:
+            # Ищем преподавателя, который указал этого пользователя как студента (через tutorcode)
+            query = select(User).where(User.tutorcode == str(user.user_id))
             result = await session.execute(query)
             tutor = result.scalar()
             tutor_name = tutor.user_name if tutor else "Неизвестно"
             info += f"\nПреподаватель: {tutor_name}"
+
         info += "\n\nЧтобы загрузить Codewars-профили, используйте команду:\n/load <url1>, <url2>, ..."
 
         await message.answer(info)
-    logging.info(f"Статус для {message.from_user.id}")
 
+    logging.info(f"Статус для {message.from_user.id}")
 
 @router.message(Command("load"))
 async def command_load_handler(message: types.Message):
@@ -169,7 +173,7 @@ async def handle_tutorcode_input(message: types.Message):
         new_user = {
             "user_id": message.from_user.id,
             "user_name": message.from_user.username or "Unknown",
-            "subscribe": code
+            "tutorcode": code
         }
         await session.execute(insert(User).values(**new_user))
         await session.commit()
