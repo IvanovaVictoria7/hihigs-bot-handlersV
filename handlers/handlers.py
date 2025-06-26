@@ -170,14 +170,42 @@ async def help_handler(message: types.Message):
 async def handle_tutorcode_input(message: types.Message):
     async with async_session() as session:
         code = message.text.split("-")[1]
-        new_user = {
-            "user_id": message.from_user.id,
-            "user_name": message.from_user.username or "Unknown"
-        }
-        await session.execute(insert(User).values(**new_user))
-        await session.commit()
-        await message.answer("Вы зарегистрированы как слушатель! Проверьте статус: /status")
-    logging.info(f"Пользователь {message.from_user.id} зарегистрирован как слушатель")
+
+        # Найти преподавателя по коду
+        teacher = await session.scalar(select(User).where(User.tutorcode == code))
+        if not teacher:
+            await message.answer("Преподаватель с таким кодом не найден.")
+            return
+
+        # Проверить, есть ли уже пользователь
+        user = await session.scalar(select(User).where(User.user_id == message.from_user.id))
+        if not user:
+            # Если нет — создаём нового студента
+            user = User(
+                user_id=message.from_user.id,
+                user_name=message.from_user.username or "Unknown",
+                role="student"
+            )
+            session.add(user)
+            await session.commit()
+        elif user.role == "teacher":
+            await message.answer("Вы уже зарегистрированы как преподаватель. Нельзя быть одновременно и студентом.")
+            return
+
+        # Проверяем, есть ли уже подписка
+        existing = await session.scalar(select(Subscription).where(
+            (Subscription.teacher_id == teacher.user_id) &
+            (Subscription.student_id == user.user_id)
+        ))
+        if not existing:
+            subscription = Subscription(
+                teacher_id=teacher.user_id,
+                student_id=user.user_id
+            )
+            session.add(subscription)
+            await session.commit()
+
+        await message.answer("Вы успешно прикреплены к преподавателю!")
 
 
 @router.message(lambda message: message.text == "📖 О нас")
