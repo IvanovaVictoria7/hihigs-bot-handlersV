@@ -1,19 +1,60 @@
 __all__ = [
     "User",
     "Base",
+    "Profile",
+    "Task",
+    "Subscription"
 ]
 
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import Column, Integer, VARCHAR, Text
+from sqlalchemy import Column, Integer, Text, ForeignKey, VARCHAR, Boolean
+from sqlalchemy.orm import declarative_base, relationship
 
-class Base(DeclarativeBase):
-    pass
+Base = declarative_base()
+
 
 class User(Base):
-    __tablename__ = "user_table"
-    user_id = Column(Integer, primary_key=True)
-    user_name = Column(VARCHAR(255), nullable=False, default="Unknown")
-    tutorcode = Column(VARCHAR(6), nullable=True)
-    subscribe = Column(VARCHAR(6), nullable=True)
-    extra = Column(Text, nullable=True)
+    __tablename__ = "users"
+
+    user_id = Column(Integer,primary_key=True)
+    user_name = Column(VARCHAR(255),nullable=False, default="Unknown")
+    role = Column(VARCHAR(20),nullable=False, default="student") # student или teacher
+    tutorcode = Column(VARCHAR(6), nullable=True, unique=True)  # Поле для кода преподавателя
+    extra = Column(Text,nullable=True)
+
+    profiles = relationship("Profile",      back_populates="owner")
+    students = relationship("Subscription", back_populates="teacher", foreign_keys="[Subscription.teacher_id]")
+    teachers = relationship("Subscription", back_populates="student", foreign_keys="[Subscription.student_id]")
+
+
+class Profile(Base):
+    __tablename__ = "profiles"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.user_id"))
+    profile_url = Column(VARCHAR(255), nullable=False)
+
+    owner = relationship("User",back_populates="profiles")
+    tasks = relationship("Task", back_populates="profile")
+
+
+class Task(Base):
+    __tablename__ = "tasks"
+
+    id = Column(Integer, primary_key=True)
+    profile_id = Column(Integer, ForeignKey("profiles.id"))
+    task_name = Column(VARCHAR(255), nullable=False)
+
+    profile = relationship("Profile", back_populates="tasks")
+
+
+class Subscription(Base):
+    __tablename__ = "subscriptions"
+
+    id = Column(Integer, primary_key=True)
+    teacher_id = Column(Integer, ForeignKey("users.user_id"))
+    student_id = Column(Integer, ForeignKey("users.user_id"))
+    active = Column(Boolean, default=True)
+
+    teacher = relationship("User", back_populates="students", foreign_keys=[teacher_id])
+    student = relationship("User", back_populates="teachers", foreign_keys=[student_id])
 
