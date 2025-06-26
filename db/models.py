@@ -19,6 +19,8 @@ class User(Base):
     user_name = Column(VARCHAR(255),nullable=False, default="Unknown")
     role = Column(VARCHAR(20),nullable=False, default="student")  # student или teacher
     extra = Column(Text,nullable=True)
+    tutorcode = Column(VARCHAR(100), nullable=True)
+
 
     profiles = relationship("Profile",      back_populates="owner")
     students = relationship("Subscription", back_populates="teacher", foreign_keys="[Subscription.teacher_id]")
